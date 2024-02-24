@@ -4,6 +4,7 @@ import axios from 'axios';
 
 export default function Home(){
     const [data, setData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(10);
 
@@ -21,19 +22,27 @@ export default function Home(){
         getData();
     }, []);
 
-    // Get current records
     const indexOfLastRecord = currentPage * recordsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
+    const filteredData = data.filter(item =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.body.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    const currentRecords = filteredData.slice(indexOfFirstRecord, indexOfLastRecord);
 
-    // Change page
     const paginate = pageNumber => setCurrentPage(pageNumber);
 
     return(
         <div className='page'>
             <div className='box'>
                 <div className='search-div'>
-                    Search
+                    <input 
+                        className='search'
+                        type='text' 
+                        placeholder='Search...' 
+                        value={searchQuery} 
+                        onChange={e => setSearchQuery(e.target.value)}
+                    />
                 </div>
                 <table className='data-table'>
                     <thead>
@@ -63,7 +72,7 @@ export default function Home(){
                 </table>
 
                 <div className='table-footer'>
-                    <p className='active-customers'>ACTIVE IDs: {indexOfFirstRecord + 1}-{indexOfLastRecord} of {data.length}</p>
+                    <p className='active-customers'>ACTIVE IDs: {indexOfFirstRecord + 1}-{indexOfLastRecord} of {filteredData.length}</p>
                     <div className='page-details'>
                         <span>Rows per page</span>
                         <select className='rows-dropdown' onChange={(e) => setRecordsPerPage(parseInt(e.target.value))}>
@@ -78,11 +87,11 @@ export default function Home(){
                             <option value='9'>9</option>
                             <option value='10'>10</option>
                         </select>
-                        <p>{indexOfFirstRecord + 1}-{indexOfLastRecord} of {data.length}</p>
+                        <p>{indexOfFirstRecord + 1}-{indexOfLastRecord} of {filteredData.length}</p>
                     </div>
                     <div className='pagination'>
                         <button className='pagination-btn' onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>&lt;</button>
-                        <button className='pagination-btn' onClick={() => paginate(currentPage + 1)} disabled={indexOfLastRecord >= data.length}>&gt;</button>
+                        <button className='pagination-btn' onClick={() => paginate(currentPage + 1)} disabled={indexOfLastRecord >= filteredData.length}>&gt;</button>
                     </div>
                 </div>
             </div>
